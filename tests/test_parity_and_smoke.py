@@ -55,18 +55,44 @@ def test_package_imports():
     import wordle_solver.eval.benchmark  # noqa: F401
 
 
-@pytest.mark.parametrize("script", ["app.py", "pages/1_CSP_Solver.py", "pages/2_Entropy_Solver.py"])
-def test_streamlit_scripts_run(script):
+def _overview():
+    from wordle_solver.app.pages import render_overview_page
+
+    render_overview_page()
+
+
+def _csp():
+    from wordle_solver.app.pages import render_csp_page
+
+    render_csp_page()
+
+
+def _entropy():
+    from wordle_solver.app.pages import render_entropy_page
+
+    render_entropy_page()
+
+
+def test_app_entry_point_runs():
     from streamlit.testing.v1 import AppTest
 
-    at = AppTest.from_file(str(ROOT / script), default_timeout=60).run()
+    at = AppTest.from_file(str(ROOT / "app.py"), default_timeout=60).run()
+    assert not at.exception
+    assert at.title[0].value == "Wordle Solver"
+
+
+@pytest.mark.parametrize("page", [_overview, _csp, _entropy])
+def test_pages_render(page):
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_function(page, default_timeout=60).run()
     assert not at.exception
 
 
 def test_csp_page_interaction():
     from streamlit.testing.v1 import AppTest
 
-    at = AppTest.from_file(str(ROOT / "pages/1_CSP_Solver.py"), default_timeout=60).run()
+    at = AppTest.from_function(_csp, default_timeout=60).run()
     at.text_input(key="csp_guess").input("slate")
     at.text_input(key="csp_fb").input("BBBBX")
     at.button(key="csp_analyze").click().run()
@@ -74,7 +100,18 @@ def test_csp_page_interaction():
     at.text_input(key="csp_fb").input("BBBBB")
     at.button(key="csp_analyze").click().run()
     assert not at.exception
-    assert any("Remaining candidates" in str(m.value) for m in at.markdown)
+    assert [m.label for m in at.metric] == ["Possible answers remaining"]
+
+
+def test_entropy_page_suggests_a_guess():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_function(_entropy, default_timeout=120).run()
+    at.text_input(key="entropy_guess").input("TARES")
+    at.text_input(key="entropy_fb").input("BYBYY")
+    at.button(key="entropy_analyze").click().run()
+    assert not at.exception
+    assert any("Suggested next guess" in m.value for m in at.markdown)
 
 
 def test_legacy_script_is_untouched_runnable():

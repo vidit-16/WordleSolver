@@ -57,21 +57,15 @@ That same feedback function is used during evaluation, so the solver is tested a
 
 ## App
 
-The Streamlit app exposes the two approaches separately:
+The Streamlit app has three pages: an overview comparing the two methods, the constraint solver, and the hybrid entropy solver.
 
-```text
-Wordle Solver
-├── CSP Solver
-└── Hybrid Entropy Solver
-```
-
-For either approach, enter a five-letter guess and the resulting `G/Y/B` pattern. The app keeps the candidate state, shows the number of remaining solutions, suggests the next guess, and records the guess history.
+On either solver page, enter a five-letter guess and the resulting `G/Y/B` pattern. The app keeps the candidate state, shows the number of remaining solutions, suggests the next guess, and records the guess history.
 
 <p align="center">
-  <img src="docs/screenshots/wordle_csp.png" alt="CSP solver narrowing to 7 candidates" width="49%">
-  <img src="docs/screenshots/wordle_entropy.png" alt="Hybrid solver choosing an entropy guess" width="49%">
+  <img src="docs/screenshots/wordle_csp.png" alt="Constraint solver with 7 possible answers ranked" width="49%">
+  <img src="docs/screenshots/wordle_entropy.png" alt="Hybrid solver suggesting a next guess" width="49%">
 </p>
-<p align="center"><em>CSP solver after two guesses, down to 7 candidates (left). Hybrid solver picking an information-gain guess from 28 candidates (right).</em></p>
+<p align="center"><em>Constraint solver after two guesses: 7 possible answers, ranked (left). Hybrid solver suggesting the guess that best splits 28 possible answers (right).</em></p>
 
 ## Architecture
 
@@ -92,8 +86,8 @@ flowchart LR
 
 ```text
 .
-├── app.py                     # Streamlit entry point
-├── pages/                     # thin Streamlit page wrappers
+├── app.py                     # Streamlit entry point and navigation
+├── assets/, .streamlit/       # favicon and Streamlit settings
 ├── wordle_solver/
 │   ├── config.py              # paths, limits, pool sizes (env overridable)
 │   ├── feedback.py            # Wordle feedback + candidate filtering
@@ -136,7 +130,7 @@ python scripts/mutation_test.py   # mutation score for the core logic
 
 - **Unit tests** for feedback (including repeated letters), scoring, entropy, both solvers, word-list validation and the app session state.
 - **Parity tests** check the refactored package against the original `evaluation.py` (kept verbatim in `tests/legacy/`): feedback on 3,000 random word pairs, scoring and entropy, and solver guess sequences.
-- **Smoke tests** run `app.py` and both pages with Streamlit's `AppTest`, including invalid-feedback handling.
+- **Smoke tests** run `app.py` and every page with Streamlit's `AppTest`, including invalid feedback and a hybrid suggestion.
 - **Mutation testing**: `scripts/mutation_test.py` applies 64 operator and constant mutations to the feedback, solver and session modules; **57 are killed (89.1%)**. The 7 survivors change only error-message text, comments, or swap `None` for `""` as a consumed-letter marker, none of which alter behaviour. Details: [`docs/mutation_results.md`](docs/mutation_results.md).
 
 ## What I was interested in

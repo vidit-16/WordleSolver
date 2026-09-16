@@ -7,7 +7,8 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt && useradd --create-home appuser
 
 COPY --chown=appuser:appuser app.py ./
-COPY --chown=appuser:appuser pages ./pages
+COPY --chown=appuser:appuser assets ./assets
+COPY --chown=appuser:appuser .streamlit ./.streamlit
 COPY --chown=appuser:appuser wordle_solver ./wordle_solver
 COPY --chown=appuser:appuser data ./data
 
