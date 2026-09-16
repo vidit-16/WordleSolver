@@ -42,13 +42,15 @@ class GameSession:
         guess = (guess or "").strip().upper()
         pattern = (pattern or "").strip().upper()
         if not is_valid_word(guess):
-            raise InvalidMoveError("Guess must be exactly 5 letters (A-Z).")
+            raise InvalidMoveError("Guess must be a 5-letter word using the letters A to Z.")
         if not is_valid_pattern(pattern):
-            raise InvalidMoveError("Feedback must be exactly 5 characters of G, Y or B.")
+            raise InvalidMoveError("Feedback must be 5 letters, each G, Y or B.")
         if self.solved:
-            raise InvalidMoveError("Already solved - reset to start a new game.")
+            raise InvalidMoveError("This game is already solved. Start a new game to play again.")
         if len(self.history) >= config.MAX_GUESSES:
-            raise InvalidMoveError(f"Max {config.MAX_GUESSES} guesses reached - reset.")
+            raise InvalidMoveError(
+                f"Max {config.MAX_GUESSES} guesses reached. Start a new game to play again."
+            )
         self.history.append((guess, pattern))
         if pattern != config.SOLVED_PATTERN:
             self.candidates = filter_candidates(self.candidates, guess, pattern)
