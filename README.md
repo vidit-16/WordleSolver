@@ -67,6 +67,12 @@ Wordle Solver
 
 For either approach, enter a five-letter guess and the resulting `G/Y/B` pattern. The app keeps the candidate state, shows the number of remaining solutions, suggests the next guess, and records the guess history.
 
+<p align="center">
+  <img src="docs/screenshots/wordle_csp.png" alt="CSP solver narrowing to 7 candidates" width="49%">
+  <img src="docs/screenshots/wordle_entropy.png" alt="Hybrid solver choosing an entropy guess" width="49%">
+</p>
+<p align="center"><em>CSP solver after two guesses, down to 7 candidates (left). Hybrid solver picking an information-gain guess from 28 candidates (right).</em></p>
+
 ## Architecture
 
 ```mermaid
