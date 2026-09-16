@@ -1,0 +1,23 @@
+[project]
+name = "wordle-solver"
+version = "1.0.0"
+description = "Wordle solver comparing constraint satisfaction and entropy-driven strategies"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = ["tests/legacy"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+ignore = ["RUF001"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.coverage.run]
+source = ["wordle_solver"]
+omit = ["wordle_solver/app/pages.py"]
