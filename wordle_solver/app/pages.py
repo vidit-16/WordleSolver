@@ -14,6 +14,7 @@ from wordle_solver.wordlists import WordListError, WordLists, load_word_lists
 
 logger = logging.getLogger(__name__)
 
+
 @st.cache_data
 def _cached_lists() -> WordLists:
     return load_word_lists()
