@@ -59,7 +59,7 @@ That same feedback function is used during evaluation, so the solver is tested a
 
 The Streamlit app has three pages: an overview comparing the two methods, the constraint solver, and the hybrid entropy solver.
 
-On either solver page, enter a five-letter guess and the resulting `G/Y/B` pattern. The app keeps the candidate state, shows the number of remaining solutions, suggests the next guess, and records the guess history.
+On either solver page, enter a five-letter guess and the resulting `G/Y/B` pattern. The app keeps the candidate state, shows the number of remaining solutions, suggests the next guess, and replays the guess history as the tiles you saw on your own board.
 
 <p align="center">
   <img src="docs/screenshots/wordle_csp.png" alt="Constraint solver with 7 possible answers ranked" width="49%">

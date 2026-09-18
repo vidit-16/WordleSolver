@@ -8,17 +8,11 @@ import pandas as pd
 import streamlit as st
 
 from wordle_solver import config
+from wordle_solver.app import theme
 from wordle_solver.app.session import GameSession, InvalidMoveError
 from wordle_solver.wordlists import WordListError, WordLists, load_word_lists
 
 logger = logging.getLogger(__name__)
-
-FEEDBACK_HELP = (
-    "One letter per tile, left to right. "
-    "G = green (right letter, right position), "
-    "Y = yellow (in the word, wrong position), "
-    "B = grey (not in the word)."
-)
 
 
 @st.cache_data
@@ -48,7 +42,10 @@ def _inputs(session: GameSession, key: str) -> None:
         st.rerun()
     guess = st.text_input("Guess", key=f"{key}_guess", placeholder="e.g. CRANE", max_chars=5)
     fb = st.text_input("Feedback", key=f"{key}_fb", placeholder="e.g. BYBBG", max_chars=5)
-    st.caption(FEEDBACK_HELP)
+    st.markdown(
+        f'<p style="color:#5b6472;font-size:14px">{theme.feedback_help()}</p>',
+        unsafe_allow_html=True,
+    )
     if st.button("Apply feedback", key=f"{key}_analyze", type="primary"):
         try:
             session.apply(guess, fb)
@@ -78,15 +75,19 @@ def _history(session: GameSession) -> None:
     st.divider()
     st.subheader("Guesses so far")
     if session.history:
-        table = pd.DataFrame(session.history, columns=["Guess", "Feedback"])
-        table.index = range(1, len(table) + 1)
-        table.index.name = "Turn"
-        st.table(table)
+        # Tiles rather than a two-column table: this is what the player is
+        # looking at on their own board, so it should look the same here.
+        rows = "".join(
+            theme.tiles(guess, feedback, turn)
+            for turn, (guess, feedback) in enumerate(session.history, start=1)
+        )
+        st.markdown(rows, unsafe_allow_html=True)
     else:
         st.write("No guesses yet. Enter your first guess and the feedback Wordle gave you.")
 
 
 def render_overview_page() -> None:
+    theme.inject()
     st.title("Wordle Solver")
     st.write(
         "Suggests the next Wordle guess from the feedback you have so far, using one of "
@@ -112,12 +113,17 @@ def render_overview_page() -> None:
         "1. Choose a solver from the sidebar.\n"
         "2. Enter the word you guessed in Wordle.\n"
         "3. Enter the colours Wordle showed, as five letters: "
-        "**G** for green, **Y** for yellow, **B** for grey.\n"
-        "4. The solver narrows the possible answers and suggests your next guess."
+        f"{theme.key('G')} for green, {theme.key('Y')} for yellow, "
+        f"{theme.key('B')} for grey.\n"
+        "4. The solver narrows the possible answers and suggests your next guess.",
+        unsafe_allow_html=True,
     )
+    st.caption("A worked example: TARES against a word containing A and E, elsewhere.")
+    st.markdown(theme.tiles("TARES", "BYBYY"), unsafe_allow_html=True)
 
 
 def render_csp_page() -> None:
+    theme.inject()
     st.title("Constraint solver")
     st.write(
         "Keeps only the answers consistent with every piece of feedback, then ranks them "
@@ -136,6 +142,7 @@ def render_csp_page() -> None:
 
 
 def render_entropy_page() -> None:
+    theme.inject()
     st.title("Hybrid entropy solver")
     st.write(
         "While many answers remain, suggests the guess expected to eliminate the most of them, "
@@ -154,6 +161,8 @@ def render_entropy_page() -> None:
                 if method == "entropy"
                 else "the most likely remaining answer"
             )
-            st.markdown(f"**Suggested next guess: {word}**")
-            st.caption(reason.capitalize() + ".")
+            st.markdown(
+                theme.callout("Suggested next guess", word, reason.capitalize() + "."),
+                unsafe_allow_html=True,
+            )
     _history(session)
